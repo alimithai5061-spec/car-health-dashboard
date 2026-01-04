@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Car Health Dashboard</title>
+    
+    <!-- Add this meta tag for proper rendering -->
+    <meta name="google-site-verification" content="google-site-verification">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* PASTE YOUR ENTIRE CSS HERE */
+        /* Copy all CSS from your dashboard code */
+        /* Put it right here inside the <style> tag */
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; }
+        /* ... continue with your CSS ... */
+    </style>
+</head>
+<body>
+    <!-- PASTE YOUR ENTIRE HTML BODY HERE -->
+    <!-- Copy everything from <body> to </body> -->
+    <!-- Put it right here -->
+    
+    <script>
+        // PASTE YOUR ENTIRE JAVASCRIPT HERE
+        // Copy all JavaScript code
+        // Put it right here inside the <script> tag
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Car Dashboard loaded');
+            // Your JavaScript code here...
+        });
+    </script>
+</body>
+</html>
