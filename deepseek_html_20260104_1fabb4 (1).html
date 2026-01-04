@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoSphere Pro | Advanced Vehicle Health Intelligence Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        :root {
+            --primary: #0a2463;
+            --secondary: #3e92cc;
+            --accent: #ff595e;
+            --success: #4cc9f0;
+            --warning: #ff9e00;
+            --danger: #ff3864;
+            --dark: #121212;
+            --darker: #0a0a0a;
+            --light: #f8f9fa;
+            --gray: #2d3748;
+            --gray-light: #4a5568;
+            --gradient-primary: linear-gradient(135deg, #0a2463, #3e92cc);
+            --gradient-danger: linear-gradient(135deg, #ff3864, #ff9e00);
+            --gradient-success: linear-gradient(135deg, #4cc9f0, #2a9d8f);
+            --border-radius: 16px;
+            --border-radius-sm: 8px;
+            --border-radius-lg: 24px;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --blur: blur(10px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(62, 146, 204, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 89, 94, 0.05) 0%, transparent 20%);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        .container {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(10, 36, 99, 0.8);
+            backdrop-filter: var(--blur);
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--success);
+            filter: drop-shadow(0 0 10px rgba(76, 201, 240, 0.5));
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .logo-text h1 {
+            font-weight: 900;
+            font-size: 2rem;
+            background: linear-gradient(90deg, var(--light), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .user-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .vehicle-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .vehicle-selector:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .vehicle-icon {
+            font-size: 1.5rem;
+            color: var(--success);
+        }
+
+        .theme-toggle {
+            width: 60px;
+            height: 30px;
+            background: var(--gray);
+            border-radius: 50px;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: var(--light);
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: var(--transition);
+        }
+
+        .theme-toggle.active {
+            background: var(--secondary);
+        }
+
+        .theme-toggle.active::before {
+            transform: translateX(30px);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: auto;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--light);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: var(--border-radius-sm);
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+        }
+
+        .btn-primary:hover {
+            background: #2a7cb3;
+        }
+
+        /* Health Overview Card */
+        .health-overview {
+            grid-column: span 4;
+            background: var(--gradient-primary);
+        }
+
+        .health-score {
+            font-size: 5rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 20px 0;
+            background: linear-gradient(90deg, var(--light), #a5d8ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .health-status {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .health-rings {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+
+        .ring-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .ring-inner {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* 3D Car Visualization */
+        .car-3d-container {
+            grid-column: span 8;
+            height: 500px;
+            position: relative;
+        }
+
+        #car-3d {
+            width: 100%;
+            height: 100%;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .car-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        /* System Health Grid */
+        .system-health {
+            grid-column: span 6;
+        }
+
+        .system-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .system-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-sm);
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .system-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .system-card.critical {
+            border-color: var(--danger);
+            animation: alert-pulse 2s infinite;
+        }
+
+        @keyframes alert-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 56, 100, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 56, 100, 0); }
+        }
+
+        .system-card.warning {
+            border-color: var(--warning);
+        }
+
+        .system-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--success);
+        }
+
+        .system-card.critical .system-icon {
+            color: var(--danger);
+        }
+
+        .system-card.warning .system-icon {
+            color: var(--warning);
+        }
+
+        /* Real-time Telemetry */
+        .telemetry {
+            grid-column: span 6;
+        }
+
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .telemetry-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-sm);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .telemetry-icon {
+            font-size: 1.8rem;
+            color: var(--success);
+        }
+
+        .telemetry-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .telemetry-unit {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Maintenance Timeline */
+        .maintenance-timeline {
+            grid-column: span 8;
+        }
+
+        .timeline {
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gray);
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .timeline-date {
+            width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--success);
+            font-size: 0.9rem;
+        }
+
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--secondary);
+            position: absolute;
+            left: 21px;
+            top: 3px;
+            z-index: 1;
+        }
+
+        .timeline-content {
+            margin-left: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: var(--border-radius-sm);
+            flex: 1;
+        }
+
+        .timeline-content.critical {
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Predictive Analytics */
+        .predictive-analytics {
+            grid-column: span 4;
+        }
+
+        .prediction-list {
+            margin-top: 20px;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 10px;
+        }
+
+        /* Sensor Network */
+        .sensor-network {
+            grid-column: span 12;
+            height: 400px;
+        }
+
+        #sensor-network {
+            width: 100%;
+            height: 100%;
+            border-radius: var(--border-radius-sm);
+        }
+
+        /* Component Details Panel */
+        .component-details {
+            position: fixed;
+            top: 0;
+            right: -600px;
+            width: 600px;
+            height: 100vh;
+            background: var(--dark);
+            z-index: 1000;
+            transition: var(--transition);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .component-details.active {
+            right: 0;
+        }
+
+        .close-details {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--light);
+            transition: var(--transition);
+        }
+
+        .close-details:hover {
+            color: var(--accent);
+            transform: rotate(90deg);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1600px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+            
+            .health-overview, .predictive-analytics {
+                grid-column: span 4;
+            }
+            
+            .car-3d-container, .maintenance-timeline {
+                grid-column: span 8;
+            }
+            
+            .system-health, .telemetry {
+                grid-column: span 4;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .health-overview, .car-3d-container, .system-health, .telemetry, 
+            .maintenance-timeline, .predictive-analytics {
+                grid-column: span 4;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card {
+                grid-column: span 1 !important;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .component-details {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Status Colors */
+        .status-good { color: var(--success); }
+        .status-warning { color: var(--warning); }
+        .status-critical { color: var(--danger); }
+        
+        .bg-good { background: rgba(76, 201, 240, 0.1); }
+        .bg-warning { background: rgba(255, 158, 0, 0.1); }
+        .bg-critical { background: rgba(255, 56, 100, 0.1); }
+
+        /* Progress Bars */
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .progress-good { background: var(--success); }
+        .progress-warning { background: var(--warning); }
+        .progress-critical { background: var(--danger); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-car-side"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>AutoSphere Pro</h1>
+                    <p>Advanced Vehicle Health Intelligence Platform</p>
+                </div>
+            </div>
+            
+            <div class="user-controls">
+                <div class="vehicle-selector">
+                    <i class="fas fa-car vehicle-icon"></i>
+                    <div>
+                        <div class="vehicle-name">Tesla Model 3 Performance</div>
+                        <div class="vehicle-details">VIN: 5YJ3E1EA0MF123456 • 24,850 miles</div>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                
+                <div class="theme-toggle active" id="themeToggle">
+                    <i class="fas fa-sun" style="position: absolute; left: 8px; top: 3px; font-size: 12px;"></i>
+                    <i class="fas fa-moon" style="position: absolute; right: 8px; top: 3px; font-size: 12px;"></i>
+                </div>
+                
+                <button class="btn">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Health Overview -->
+            <div class="card health-overview">
+                <div class="card-header">
+                    <h2 class="card-title">Vehicle Health Score</h2>
+                    <div class="card-actions">
+                        <button class="btn">
+                            <i class="fas fa-history"></i>
+                            <span>Trend</span>
+                        </button>
+                        <button class="btn">
+                            <i class="fas fa-download"></i>
+                            <span>Report</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="health-score" id="healthScore">94%</div>
+                <div class="health-status">Excellent • All systems operational</div>
+                
+                <div class="health-rings">
+                    <div class="ring-container">
+                        <div class="ring">
+                            <canvas id="safetyRing" width="80" height="80"></canvas>
+                            <div class="ring-inner">98%</div>
+                        </div>
+                        <div>Safety</div>
+                    </div>
+                    
+                    <div class="ring-container">
+                        <div class="ring">
+                            <canvas id="performanceRing" width="80" height="80"></canvas>
+                            <div class="ring-inner">92%</div>
+                        </div>
+                        <div>Performance</div>
+                    </div>
+                    
+                    <div class="ring-container">
+                        <div class="ring">
+                            <canvas id="efficiencyRing" width="80" height="80"></canvas>
+                            <div class="ring-inner">96%</div>
+                        </div>
+                        <div>Efficiency</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Car Visualization -->
+            <div class="card car-3d-container">
+                <div class="card-header">
+                    <h2 class="card-title">3D Vehicle Inspection</h2>
+                    <div class="card-actions">
+                        <button class="btn" id="rotateView">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Rotate</span>
+                        </button>
+                        <button class="btn" id="explodeView">
+                            <i class="fas fa-expand-alt"></i>
+                            <span>Explode</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="car-3d"></div>
+                <div class="car-controls">
+                    <button class="btn btn-primary" id="diagnosticScan">
+                        <i class="fas fa-search"></i>
+                        <span>Full Diagnostic Scan</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Health Grid -->
+            <div class="card system-health">
+                <div class="card-header">
+                    <h2 class="card-title">System Health Matrix</h2>
+                    <div class="card-actions">
+                        <button class="btn" id="filterAll">
+                            <span>All</span>
+                        </button>
+                        <button class="btn" id="filterCritical">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Critical</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="system-grid" id="systemGrid">
+                    <!-- Systems will be dynamically generated -->
+                </div>
+            </div>
+
+            <!-- Real-time Telemetry -->
+            <div class="card telemetry">
+                <div class="card-header">
+                    <h2 class="card-title">Real-time Telemetry</h2>
+                    <div class="card-actions">
+                        <button class="btn" id="pauseTelemetry">
+                            <i class="fas fa-pause"></i>
+                            <span>Pause</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="telemetry-grid" id="telemetryGrid">
+                    <!-- Telemetry data will be dynamically generated -->
+                </div>
+            </div>
+
+            <!-- Maintenance Timeline -->
+            <div class="card maintenance-timeline">
+                <div class="card-header">
+                    <h2 class="card-title">Maintenance Timeline</h2>
+                    <div class="card-actions">
+                        <button class="btn">
+                            <i class="fas fa-plus"></i>
+                            <span>Schedule</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="timeline" id="maintenanceTimeline">
+                    <!-- Timeline items will be dynamically generated -->
+                </div>
+            </div>
+
+            <!-- Predictive Analytics -->
+            <div class="card predictive-analytics">
+                <div class="card-header">
+                    <h2 class="card-title">Predictive Analytics</h2>
+                    <div class="card-actions">
+                        <button class="btn">
+                            <i class="fas fa-brain"></i>
+                            <span>AI Insights</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="prediction-list" id="predictionList">
+                    <!-- Predictions will be dynamically generated -->
+                </div>
+            </div>
+
+            <!-- Sensor Network Visualization -->
+            <div class="card sensor-network">
+                <div class="card-header">
+                    <h2 class="card-title">Sensor Network Intelligence</h2>
+                    <div class="card-actions">
+                        <button class="btn">
+                            <i class="fas fa-network-wired"></i>
+                            <span>Live Feed</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <canvas id="sensor-network"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Component Details Panel -->
+    <div class="component-details" id="componentDetails">
+        <div class="close-details" id="closeDetails">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <div id="detailsContent">
+            <!-- Content will be dynamically loaded -->
+        </div>
+    </div>
+
+    <!-- Audio for notifications -->
+    <audio id="alertSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alert-digital-clock-beep-989.mp3"></audio>
+
+    <script>
+        // Initialize global variables
+        let scene, camera, renderer, controls;
+        let healthScore = 94;
+        let telemetryPaused = false;
+        let selectedSystem = null;
+        let vehicleData = {
+            vin: "5YJ3E1EA0MF123456",
+            make: "Tesla",
+            model: "Model 3 Performance",
+            year: 2023,
+            mileage: 24850,
+            lastService: "2024-01-15",
+            nextService: "2024-07-15"
+        };
+
+        // System data
+        const systems = [
+            { id: 'engine', name: 'Powertrain', health: 96, status: 'good', icon: 'fas fa-cogs', components: 24, alerts: 0 },
+            { id: 'battery', name: 'Battery Pack', health: 92, status: 'warning', icon: 'fas fa-battery-three-quarters', components: 18, alerts: 2 },
+            { id: 'brakes', name: 'Braking System', health: 88, status: 'warning', icon: 'fas fa-stop-circle', components: 12, alerts: 1 },
+            { id: 'suspension', name: 'Suspension', health: 95, status: 'good', icon: 'fas fa-car-side', components: 16, alerts: 0 },
+            { id: 'climate', name: 'Climate Control', health: 98, status: 'good', icon: 'fas fa-snowflake', components: 8, alerts: 0 },
+            { id: 'electrical', name: 'Electrical', health: 91, status: 'warning', icon: 'fas fa-bolt', components: 42, alerts: 3 },
+            { id: 'safety', name: 'Safety Systems', health: 99, status: 'good', icon: 'fas fa-shield-alt', components: 28, alerts: 0 },
+            { id: 'infotainment', name: 'Infotainment', health: 97, status: 'good', icon: 'fas fa-desktop', components: 14, alerts: 0 },
+            { id: 'lights', name: 'Lighting', health: 100, status: 'good', icon: 'fas fa-lightbulb', components: 22, alerts: 0 }
+        ];
+
+        // Telemetry data
+        const telemetry = [
+            { id: 'speed', name: 'Speed', value: 0, unit: 'mph', icon: 'fas fa-tachometer-alt', min: 0, max: 155, trend: 'up' },
+            { id: 'rpm', name: 'Motor RPM', value: 0, unit: 'RPM', icon: 'fas fa-cog', min: 0, max: 18000, trend: 'neutral' },
+            { id: 'temp', name: 'Battery Temp', value: 25, unit: '°C', icon: 'fas fa-thermometer-half', min: -20, max: 60, trend: 'up' },
+            { id: 'voltage', name: 'System Voltage', value: 400, unit: 'V', icon: 'fas fa-bolt', min: 350, max: 450, trend: 'stable' },
+            { id: 'range', name: 'Estimated Range', value: 312, unit: 'mi', icon: 'fas fa-road', min: 0, max: 315, trend: 'down' },
+            { id: 'efficiency', name: 'Efficiency', value: 4.2, unit: 'mi/kWh', icon: 'fas fa-leaf', min: 0, max: 5, trend: 'up' }
+        ];
+
+        // Maintenance timeline
+        const maintenance = [
+            { date: '2024-06-15', type: 'critical', title: 'Brake Pad Replacement', description: 'Front brake pads at 3mm thickness', status: 'pending', cost: 285 },
+            { date: '2024-07-01', type: 'warning', title: 'Tire Rotation', description: 'Regular tire rotation required', status: 'scheduled', cost: 75 },
+            { date: '2024-07-15', type: 'scheduled', title: 'Annual Service', description: 'Comprehensive vehicle inspection', status: 'scheduled', cost: 450 },
+            { date: '2024-05-20', type: 'completed', title: 'Cabin Air Filter', description: 'Cabin air filter replaced', status: 'completed', cost: 89 },
+            { date: '2024-04-05', type: 'completed', title: 'Wiper Blades', description: 'Front wiper blades replaced', status: 'completed', cost: 45 }
+        ];
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            initDashboard();
+            init3DViewer();
+            initCharts();
+            renderSystems();
+            renderTelemetry();
+            renderTimeline();
+            renderPredictions();
+            initSensorNetwork();
+            startTelemetryUpdates();
+            setupEventListeners();
+        });
+
+        // Initialize dashboard
+        function initDashboard() {
+            // Update vehicle info
+            document.querySelector('.vehicle-name').textContent = `${vehicleData.year} ${vehicleData.make} ${vehicleData.model}`;
+            document.querySelector('.vehicle-details').textContent = `VIN: ${vehicleData.vin} • ${vehicleData.mileage.toLocaleString()} miles`;
+        }
+
+        // Initialize 3D viewer
+        function init3DViewer() {
+            const container = document.getElementById('car-3d');
+            
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0a);
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(5, 3, 5);
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 5);
+            scene.add(directionalLight);
+            
+            // Add a simple car model (in production, this would be a detailed 3D model)
+            const carGroup = new THREE.Group();
+            
+            // Car body
+            const bodyGeometry = new THREE.BoxGeometry(4, 1.2, 1.8);
+            const bodyMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x3e92cc,
+                shininess: 100,
+                specular: 0x444444
+            });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            carGroup.add(body);
+            
+            // Car top
+            const topGeometry = new THREE.BoxGeometry(2.5, 0.8, 1.6);
+            const topMaterial = new THREE.MeshPhongMaterial({ color: 0x1a365d });
+            const top = new THREE.Mesh(topGeometry, topMaterial);
+            top.position.y = 1;
+            carGroup.add(top);
+            
+            // Wheels
+            const wheelGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
+            const wheelMaterial = new THREE.MeshPhongMaterial({ color: 0x222222 });
+            
+            for (let i = 0; i < 4; i++) {
+                const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+                wheel.rotation.z = Math.PI / 2;
+                
+                if (i < 2) {
+                    wheel.position.set(-1.2, -0.6, i === 0 ? 0.8 : -0.8);
+                } else {
+                    wheel.position.set(1.2, -0.6, i === 2 ? 0.8 : -0.8);
+                }
+                
+                carGroup.add(wheel);
+            }
+            
+            scene.add(carGroup);
+            
+            // Add orbit controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Rotate car slowly
+                carGroup.rotation.y += 0.002;
+                
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+
+        // Initialize charts
+        function initCharts() {
+            // Health rings
+            const rings = ['safetyRing', 'performanceRing', 'efficiencyRing'];
+            const ringValues = [98, 92, 96];
+            
+            rings.forEach((ringId, index) => {
+                const ctx = document.getElementById(ringId).getContext('2d');
+                const value = ringValues[index];
+                const color = value > 90 ? '#4cc9f0' : value > 80 ? '#ff9e00' : '#ff3864';
+                
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [value, 100 - value],
+                            backgroundColor: [color, 'rgba(255, 255, 255, 0.1)'],
+                            borderWidth: 0,
+                            cutout: '70%'
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Render system grid
+        function renderSystems() {
+            const systemGrid = document.getElementById('systemGrid');
+            systemGrid.innerHTML = '';
+            
+            systems.forEach(system => {
+                const statusClass = system.status === 'critical' ? 'critical' : 
+                                   system.status === 'warning' ? 'warning' : '';
+                
+                const systemCard = document.createElement('div');
+                systemCard.className = `system-card ${statusClass}`;
+                systemCard.dataset.systemId = system.id;
+                systemCard.innerHTML = `
+                    <div class="system-icon">
+                        <i class="${system.icon}"></i>
+                    </div>
+                    <h3>${system.name}</h3>
+                    <div class="health-score" style="font-size: 1.8rem; margin: 10px 0;">${system.health}%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${system.status === 'good' ? 'progress-good' : system.status === 'warning' ? 'progress-warning' : 'progress-critical'}" 
+                             style="width: ${system.health}%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.9rem;">
+                        <span>${system.components} components</span>
+                        ${system.alerts > 0 ? `<span class="status-${system.status}">${system.alerts} alert${system.alerts !== 1 ? 's' : ''}</span>` : ''}
+                    </div>
+                `;
+                
+                systemCard.addEventListener('click', () => showSystemDetails(system.id));
+                systemGrid.appendChild(systemCard);
+            });
+        }
+
+        // Render telemetry
+        function renderTelemetry() {
+            const telemetryGrid = document.getElementById('telemetryGrid');
+            telemetryGrid.innerHTML = '';
+            
+            telemetry.forEach(sensor => {
+                const telemetryCard = document.createElement('div');
+                telemetryCard.className = 'telemetry-card';
+                telemetryCard.innerHTML = `
+                    <div class="telemetry-icon">
+                        <i class="${sensor.icon}"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">${sensor.name}</div>
+                        <div class="telemetry-value" id="${sensor.id}Value">${sensor.value}</div>
+                        <div class="telemetry-unit">${sensor.unit}</div>
+                    </div>
+                `;
+                
+                telemetryGrid.appendChild(telemetryCard);
+            });
+        }
+
+        // Render maintenance timeline
+        function renderTimeline() {
+            const timeline = document.getElementById('maintenanceTimeline');
+            timeline.innerHTML = '';
+            
+            maintenance.forEach(item => {
+                const date = new Date(item.date);
+                const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                timelineItem.innerHTML = `
+                    <div class="timeline-date">${formattedDate}</div>
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content ${item.type === 'critical' ? 'critical' : ''}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="margin-bottom: 5px;">${item.title}</h3>
+                            <span class="status-${item.type}">$${item.cost}</span>
+                        </div>
+                        <p style="margin-bottom: 10px; color: rgba(255, 255, 255, 0.7);">${item.description}</p>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                            <span class="status-${item.status}">${item.status}</span>
+                            <button class="btn" style="padding: 5px 10px; font-size: 0.8rem;">
+                                ${item.status === 'completed' ? 'View Receipt' : 'Schedule'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                timeline.appendChild(timelineItem);
+            });
+        }
+
+        // Render predictions
+        function renderPredictions() {
+            const predictions = [
+                { component: 'Brake Pads', prediction: 'Replace in 2,500 miles', confidence: 94 },
+                { component: '12V Battery', prediction: 'Replace within 3 months', confidence: 87 },
+                { component: 'Tire Tread', prediction: 'Replace in 8,000 miles', confidence: 92 },
+                { component: 'Cabin Air Filter', prediction: 'Replace in 1 month', confidence: 76 }
+            ];
+            
+            const predictionList = document.getElementById('predictionList');
+            predictionList.innerHTML = '';
+            
+            predictions.forEach(pred => {
+                const predictionItem = document.createElement('div');
+                predictionItem.className = 'prediction-item';
+                predictionItem.innerHTML = `
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 5px;">${pred.component}</div>
+                        <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">${pred.prediction}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #4cc9f0;">${pred.confidence}%</div>
+                        <div style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.5);">Confidence</div>
+                    </div>
+                `;
+                
+                predictionList.appendChild(predictionItem);
+            });
+        }
+
+        // Initialize sensor network visualization
+        function initSensorNetwork() {
+            const canvas = document.getElementById('sensor-network');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = 300;
+            
+            // Draw sensor network
+            function drawSensorNetwork() {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw network nodes
+                const nodes = [
+                    { x: canvas.width * 0.2, y: canvas.height * 0.3, status: 'good', label: 'ECU' },
+                    { x: canvas.width * 0.4, y: canvas.height * 0.2, status: 'good', label: 'BMS' },
+                    { x: canvas.width * 0.6, y: canvas.height * 0.3, status: 'warning', label: 'ABS' },
+                    { x: canvas.width * 0.3, y: canvas.height * 0.6, status: 'good', label: 'Infotainment' },
+                    { x: canvas.width * 0.5, y: canvas.height * 0.7, status: 'good', label: 'Gateway' },
+                    { x: canvas.width * 0.7, y: canvas.height * 0.6, status: 'critical', label: 'Airbag' },
+                    { x: canvas.width * 0.8, y: canvas.height * 0.4, status: 'good', label: 'Telematics' }
+                ];
+                
+                // Draw connections
+                ctx.strokeStyle = 'rgba(62, 146, 204, 0.3)';
+                ctx.lineWidth = 1;
+                
+                nodes.forEach((node1, i) => {
+                    nodes.forEach((node2, j) => {
+                        if (i < j && Math.random() > 0.5) {
+                            ctx.beginPath();
+                            ctx.moveTo(node1.x, node1.y);
+                            ctx.lineTo(node2.x, node2.y);
+                            ctx.stroke();
+                        }
+                    });
+                });
+                
+                // Draw nodes
+                nodes.forEach(node => {
+                    // Determine color based on status
+                    let color;
+                    switch(node.status) {
+                        case 'good': color = '#4cc9f0'; break;
+                        case 'warning': color = '#ff9e00'; break;
+                        case 'critical': color = '#ff3864'; break;
+                        default: color = '#ffffff';
+                    }
+                    
+                    // Draw node
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Add glow effect for active nodes
+                    if (node.status !== 'good') {
+                        ctx.shadowColor = color;
+                        ctx.shadowBlur = 15;
+                        ctx.beginPath();
+                        ctx.arc(node.x, node.y, 12, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    }
+                    
+                    // Draw label
+                    ctx.fillStyle = 'white';
+                    ctx.font = '12px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(node.label, node.x, node.y + 30);
+                });
+                
+                // Draw central hub
+                ctx.fillStyle = '#0a2463';
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, 20, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 14px Inter';
+                ctx.fillText('CAN', canvas.width / 2, canvas.height / 2 + 5);
+            }
+            
+            drawSensorNetwork();
+            
+            // Update network animation
+            setInterval(() => {
+                drawSensorNetwork();
+                
+                // Add pulsing effect to critical nodes
+                const time = Date.now() * 0.001;
+                ctx.shadowColor = '#ff3864';
+                ctx.shadowBlur = 10 + Math.sin(time * 5) * 5;
+                
+                // Find critical nodes and redraw them with pulse
+                const criticalNodes = [{ x: canvas.width * 0.7, y: canvas.height * 0.6 }];
+                criticalNodes.forEach(node => {
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                ctx.shadowBlur = 0;
+            }, 100);
+            
+            // Handle resize
+            window.addEventListener('resize', function() {
+                canvas.width = canvas.parentElement.clientWidth;
+                drawSensorNetwork();
+            });
+        }
+
+        // Start telemetry updates
+        function startTelemetryUpdates() {
+            setInterval(() => {
+                if (telemetryPaused) return;
+                
+                // Update telemetry values
+                telemetry.forEach(sensor => {
+                    let change;
+                    
+                    switch(sensor.trend) {
+                        case 'up':
+                            change = (Math.random() * 2) - 0.5;
+                            break;
+                        case 'down':
+                            change = -(Math.random() * 2) + 0.5;
+                            break;
+                        default:
+                            change = (Math.random() * 1) - 0.5;
+                    }
+                    
+                    // Apply change with bounds
+                    sensor.value += change;
+                    sensor.value = Math.max(sensor.min, Math.min(sensor.max, sensor.value));
+                    
+                    // Update display
+                    const valueElement = document.getElementById(`${sensor.id}Value`);
+                    if (valueElement) {
+                        valueElement.textContent = sensor.value.toFixed(sensor.id === 'efficiency' ? 1 : 0);
+                    }
+                });
+                
+                // Randomly trigger alerts occasionally
+                if (Math.random() < 0.01) {
+                    triggerRandomAlert();
+                }
+            }, 1000);
+        }
+
+        // Show system details
+        function showSystemDetails(systemId) {
+            const system = systems.find(s => s.id === systemId);
+            if (!system) return;
+            
+            selectedSystem = system;
+            
+            // Show details panel
+            const detailsPanel = document.getElementById('componentDetails');
+            detailsPanel.classList.add('active');
+            
+            // Populate details
+            const detailsContent = document.getElementById('detailsContent');
+            detailsContent.innerHTML = `
+                <h2 style="font-size: 2rem; margin-bottom: 10px;">${system.name} System</h2>
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+                    <div class="health-score" style="font-size: 3rem;">${system.health}%</div>
+                    <div>
+                        <div class="status-${system.status}" style="font-size: 1.2rem; font-weight: 600;">${system.status.toUpperCase()}</div>
+                        <div style="color: rgba(255, 255, 255, 0.7);">${system.components} components • ${system.alerts} active alerts</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-bottom: 20px;">Component Health</h3>
+                <div id="componentList" style="margin-bottom: 30px;"></div>
+                
+                <h3 style="margin-bottom: 20px;">Recent Diagnostics</h3>
+                <div id="diagnosticLog"></div>
+            `;
+            
+            // Generate component list
+            const componentList = document.getElementById('componentList');
+            const components = generateComponentsForSystem(systemId);
+            
+            components.forEach(comp => {
+                const componentItem = document.createElement('div');
+                componentItem.style.cssText = `
+                    background: rgba(255, 255, 255, 0.05);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-bottom: 10px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                `;
+                
+                componentItem.innerHTML = `
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 5px;">${comp.name}</div>
+                        <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">${comp.description}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="status-${comp.status}" style="font-weight: 600;">${comp.health}%</div>
+                        <div style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.5);">Health</div>
+                    </div>
+                `;
+                
+                componentList.appendChild(componentItem);
+            });
+            
+            // Generate diagnostic log
+            const diagnosticLog = document.getElementById('diagnosticLog');
+            const diagnostics = generateDiagnosticsForSystem(systemId);
+            
+            diagnostics.forEach(log => {
+                const logItem = document.createElement('div');
+                logItem.style.cssText = `
+                    padding: 10px;
+                    border-left: 3px solid ${log.type === 'error' ? '#ff3864' : log.type === 'warning' ? '#ff9e00' : '#4cc9f0'};
+                    margin-bottom: 10px;
+                    background: rgba(255, 255, 255, 0.03);
+                `;
+                
+                logItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="font-weight: 600;">${log.code}</div>
+                        <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.5);">${log.time}</div>
+                    </div>
+                    <div style="margin-top: 5px;">${log.message}</div>
+                `;
+                
+                diagnosticLog.appendChild(logItem);
+            });
+        }
+
+        // Generate components for a system
+        function generateComponentsForSystem(systemId) {
+            const componentCount = Math.floor(Math.random() * 8) + 4;
+            const components = [];
+            
+            const componentNames = {
+                engine: ['Motor Controller', 'Inverter', 'Rotor', 'Stator', 'Cooling Pump', 'Temperature Sensors'],
+                battery: ['Cell Module 1', 'Cell Module 2', 'BMS Controller', 'Thermal Management', 'High Voltage Contactor'],
+                brakes: ['Front Left Caliper', 'Front Right Caliper', 'Brake Booster', 'ABS Module', 'Brake Fluid Reservoir'],
+                suspension: ['Front Left Strut', 'Front Right Strut', 'Rear Left Shock', 'Rear Right Shock', 'Stabilizer Bar']
+            };
+            
+            const systemComponents = componentNames[systemId] || ['Primary Controller', 'Sensors Array', 'Actuators', 'Communication Module'];
+            
+            for (let i = 0; i < componentCount; i++) {
+                const health = Math.floor(Math.random() * 30) + 70;
+                const status = health > 90 ? 'good' : health > 80 ? 'warning' : 'critical';
+                
+                components.push({
+                    name: systemComponents[i % systemComponents.length] + (i > systemComponents.length ? ` ${Math.floor(i/systemComponents.length) + 1}` : ''),
+                    description: 'Primary system component',
+                    health: health,
+                    status: status
+                });
+            }
+            
+            return components;
+        }
+
+        // Generate diagnostics for a system
+        function generateDiagnosticsForSystem(systemId) {
+            const diagnostics = [];
+            const now = new Date();
+            
+            for (let i = 0; i < 5; i++) {
+                const time = new Date(now - i * 3600000);
+                const types = ['info', 'warning', 'error'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                
+                diagnostics.push({
+                    code: `DTC_${systemId.toUpperCase()}_${Math.floor(Math.random() * 1000).toString().padStart(4, '0')}`,
+                    message: `${type === 'error' ? 'Fault detected in' : type === 'warning' ? 'Performance anomaly in' : 'Routine check passed for'} ${systemId} system`,
+                    time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    type: type
+                });
+            }
+            
+            return diagnostics;
+        }
+
+        // Trigger random alert
+        function triggerRandomAlert() {
+            const alertSystems = systems.filter(s => s.status === 'good');
+            if (alertSystems.length === 0) return;
+            
+            const randomSystem = alertSystems[Math.floor(Math.random() * alertSystems.length)];
+            randomSystem.health -= 5;
+            randomSystem.status = 'warning';
+            randomSystem.alerts += 1;
+            
+            // Update display
+            renderSystems();
+            
+            // Play alert sound
+            document.getElementById('alertSound').play();
+            
+            // Show notification
+            showNotification(`${randomSystem.name} system alert: Performance degraded`);
+        }
+
+        // Show notification
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: rgba(255, 56, 100, 0.9);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 400px;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            notification.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>${message}</div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+            
+            // Add CSS for animations
+            if (!document.getElementById('notificationStyles')) {
+                const style = document.createElement('style');
+                style.id = 'notificationStyles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Theme toggle
+            document.getElementById('themeToggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                
+                if (this.classList.contains('active')) {
+                    document.documentElement.style.setProperty('--dark', '#121212');
+                    document.documentElement.style.setProperty('--darker', '#0a0a0a');
+                } else {
+                    document.documentElement.style.setProperty('--dark', '#f8f9fa');
+                    document.documentElement.style.setProperty('--darker', '#e9ecef');
+                }
+            });
+            
+            // Close details panel
+            document.getElementById('closeDetails').addEventListener('click', function() {
+                document.getElementById('componentDetails').classList.remove('active');
+            });
+            
+            // Pause telemetry
+            document.getElementById('pauseTelemetry').addEventListener('click', function() {
+                telemetryPaused = !telemetryPaused;
+                this.innerHTML = telemetryPaused ? 
+                    '<i class="fas fa-play"></i><span>Resume</span>' : 
+                    '<i class="fas fa-pause"></i><span>Pause</span>';
+            });
+            
+            // Diagnostic scan
+            document.getElementById('diagnosticScan').addEventListener('click', function() {
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Scanning...</span>';
+                this.disabled = true;
+                
+                // Simulate scan
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-search"></i><span>Full Diagnostic Scan</span>';
+                    this.disabled = false;
+                    
+                    // Show scan results
+                    showNotification('Diagnostic scan complete: 0 new issues found');
+                }, 3000);
+            });
+            
+            // Rotate view
+            document.getElementById('rotateView').addEventListener('click', function() {
+                if (controls) {
+                    controls.autoRotate = !controls.autoRotate;
+                    controls.autoRotateSpeed = 2.0;
+                    this.innerHTML = controls.autoRotate ? 
+                        '<i class="fas fa-stop"></i><span>Stop Rotation</span>' : 
+                        '<i class="fas fa-sync-alt"></i><span>Rotate</span>';
+                }
+            });
+            
+            // Filter systems
+            document.getElementById('filterCritical').addEventListener('click', function() {
+                const systemCards = document.querySelectorAll('.system-card');
+                systemCards.forEach(card => {
+                    if (card.classList.contains('critical') || card.classList.contains('warning')) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+            
+            document.getElementById('filterAll').addEventListener('click', function() {
+                const systemCards = document.querySelectorAll('.system-card');
+                systemCards.forEach(card => {
+                    card.style.display = 'block';
+                });
+            });
+        }
+    </script>
+</body>
+</html>
